@@ -1,0 +1,12 @@
+Dork
+====
+
+DOT to PNG as a service.
+
+Run the server: `bin/dorkd`
+Use the service: `cat /path/to/graph.dot | bin/dork > graph.png`
+
+At the moment you'll need to install dot and run a Stomp server on your
+machine which makes the whole thing a little pointless, but there's no reason
+this couldn't be hosted somewhere else and you just use the client on your
+machine.

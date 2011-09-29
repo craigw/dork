@@ -1,0 +1,41 @@
+#! /usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler'
+Bundler.require
+require 'digest/sha1'
+
+WORKING_DIRECTORY = '/tmp'
+FILE_NAME_PREFIX = [ File.basename($0), Process.pid, Time.now.to_i,
+  rand(1_000_000) ].join '-'
+FILE_NAME_PATH = WORKING_DIRECTORY + '/' + FILE_NAME_PREFIX + '-'
+DOT = "/usr/local/bin/dot"
+
+client = Stomp::Client.new
+client.subscribe '/queue/dot' do |message|
+  job_id = Digest::SHA1.hexdigest message.headers['message-id']
+  file_name = FILE_NAME_PREFIX + job_id
+  puts "Received job #{file_name}"
+  png_file = file_name + '.png'
+  dot_file = file_name + '.dot'
+  File.open dot_file, 'w+' do |f|
+    f.print message.body
+  end
+  puts "DOT written to #{dot_file}"
+  command = "#{DOT} -Tpng -o#{png_file} #{dot_file}"
+  puts "Running #{command}"
+  system command
+  puts "Wrote PNG to #{png_file}"
+  png = File.read png_file
+  destination = message.headers['reply-to']
+  client.publish destination, png
+  puts "Sent PNG to client at #{destination}"
+  File.unlink png_file
+  File.unlink dot_file
+  puts "Cleaned up job #{file_name}"
+end
+
+puts "Working files: #{FILE_NAME_PATH}*"
+puts "Waiting for clients..."
+
+client.join

@@ -11,7 +11,7 @@ FILE_NAME_PREFIX = [ File.basename($0), Process.pid, Time.now.to_i,
 FILE_NAME_PATH = WORKING_DIRECTORY + '/' + FILE_NAME_PREFIX + '-'
 DOT = "/usr/local/bin/dot"
 
-client = Stomp::Client.new
+client = Stomp::Client.new ARGV[0]
 client.subscribe '/queue/dot' do |message|
   job_id = Digest::SHA1.hexdigest message.headers['message-id']
   file_name = FILE_NAME_PREFIX + job_id

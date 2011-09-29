@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 
-dot = ARGF.read
+dot = STDIN.read
 if dot.to_s.strip == ''
   puts "Give me some dot!"
   exit 1
@@ -11,7 +11,7 @@ require 'bundler'
 Bundler.require
 
 results = '/queue/dot.results-' + Process.pid.to_s + '-' + Time.now.to_i.to_s
-client = Stomp::Client.new
+client = Stomp::Client.new ARGV[0]
 client.subscribe results, 'auto-delete' => true do |message|
   puts message.body
   client.close

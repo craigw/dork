@@ -13,7 +13,7 @@ Bundler.require
 results = '/queue/dot.results-' + Process.pid.to_s + '-' + Time.now.to_i.to_s
 client = Stomp::Client.new ARGV[0]
 client.subscribe results, 'auto-delete' => true do |message|
-  puts message.body
+  print message.body
   client.close
 end
 

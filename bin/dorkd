@@ -1,15 +1,17 @@
 #! /usr/bin/env ruby
 
-require 'rubygems'
-require 'bundler'
-Bundler.require
+require 'stomp'
 require 'digest/sha1'
 
 WORKING_DIRECTORY = '/tmp'
 FILE_NAME_PREFIX = [ File.basename($0), Process.pid, Time.now.to_i,
   rand(1_000_000) ].join '-'
 FILE_NAME_PATH = WORKING_DIRECTORY + '/' + FILE_NAME_PREFIX + '-'
-DOT = "/usr/local/bin/dot"
+executable = %x[which neato].strip
+executable = %x[which dot].strip if executable == ''
+DOT = executable
+
+puts "I will run #{DOT} on incoming files"
 
 client = Stomp::Client.new ARGV[0]
 client.subscribe '/queue/dot' do |message|
